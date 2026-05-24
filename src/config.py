@@ -12,6 +12,15 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+# Load .env if present. Does nothing if the file doesn't exist or vars are
+# already set in the environment (env always wins over .env, by design).
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    pass
+
 ROOT = Path(__file__).resolve().parent.parent
 
 # The repo we're answering questions about.
@@ -36,7 +45,7 @@ class ModelConfig:
     max_tokens: int = 2048
     # Cap on iterations of the tool-call loop. Keeps a confused agent from
     # spinning forever. 8 is generous — most questions resolve in 2-4 turns.
-    max_iterations: int = 8
+    max_iterations: int = 12
 
     # Embedding model for dense retrieval. all-MiniLM-L6-v2 is small (~80MB),
     # fast, and good enough. If you want a quality bump later, bge-small-en

@@ -44,6 +44,10 @@ Guidelines:
   - Keep answers concise. A paragraph or two plus citations is usually right.
   - If you genuinely cannot find an answer after 2-3 search attempts, say so
     rather than inventing one.
+  - You typically need only 2-4 tool calls. After 5 calls, write your answer
+    based on what you have rather than searching further.
+  - Do not begin your final answer with phrases like "Now I have", "Perfect!",
+    "Let me", or similar transitions. Go straight into the answer.
 """
 
 
