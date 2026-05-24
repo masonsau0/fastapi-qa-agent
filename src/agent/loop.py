@@ -46,8 +46,11 @@ Guidelines:
     rather than inventing one.
   - You typically need only 2-4 tool calls. After 5 calls, write your answer
     based on what you have rather than searching further.
-  - Do not begin your final answer with phrases like "Now I have", "Perfect!",
-    "Let me", or similar transitions. Go straight into the answer.
+  - Your final answer must start directly with the substantive content (a
+    heading, a sentence stating the answer, or a code example). NEVER begin
+    with transitional phrases like "Now I have", "Perfect", "Let me", "Based on
+    my research", or "Here is". These are forbidden and will be considered an
+    error.
 """
 
 
