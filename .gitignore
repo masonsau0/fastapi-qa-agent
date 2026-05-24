@@ -1,0 +1,39 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets.json
+
+# Cloned target repo (we don't redistribute it)
+data/fastapi/
+
+# Built indexes (big, regenerable)
+data/index/
+data/results/
+
+# Mined candidate benchmark (you should commit `questions.jsonl` once curated,
+# but the raw mining output stays local)
+data/benchmark/candidates.jsonl
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
