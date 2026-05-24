@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fastapi-qa-agent"
+version = "0.1.0"
+description = "Tool-using agent that answers questions about the FastAPI codebase."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Mason Au" }]
+
+[tool.setuptools.packages.find]
+include = ["src*", "server*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "PL"]
+ignore = [
+    "E501",      # line too long — formatter handles it
+    "PLR0913",   # too many args — fine for argparse + config
+    "PLR2004",   # magic value comparisons — common in tests + scoring
+    "B008",      # function call in default — needed for Field(...)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["PLR2004", "B011", "PLC0415"]
+# Lazy import in lifespan keeps the app importable without heavy deps.
+"server/app.py" = ["PLC0415"]
+# CLI orchestrators are naturally long.
+"src/eval/run_eval.py" = ["PLR0912", "PLR0915", "PLC0415"]
+"src/eval/mine_benchmark.py" = ["PLR0912", "PLR0915", "PLC0415"]
+"src/retrieval/dense.py" = ["PLC0415"]
+# Many HTTP status branches in find_pr_for_commit; lazy import to avoid circular ref.
+"src/tools/impl.py" = ["PLR0911", "PLC0415"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra --strict-markers"
+testpaths = ["tests"]
