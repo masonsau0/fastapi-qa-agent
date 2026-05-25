@@ -232,7 +232,7 @@ def main() -> int:
 
     # Print summary table.
     print("\n" + "=" * 60)
-    print(f"{'Metric':<25} {'Baseline':>12} {'Agent':>12} {'Δ':>10}")
+    print(f"{'Metric':<25} {'Baseline':>12} {'Agent':>12} {'Delta':>10}")
     print("-" * 60)
     print(
         f"{'Keyword recall':<25} {summary['baseline']['keyword_recall']:>12.3f} {summary['agent']['keyword_recall']:>12.3f} {summary['delta']['keyword_recall']:>+10.3f}"

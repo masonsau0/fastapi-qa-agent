@@ -97,9 +97,11 @@ class RetrievalConfig:
 
 @dataclass
 class EvalConfig:
-    # Concurrency limit when running the benchmark. Anthropic's tier-1 limit
-    # is generous but not infinite — 4 parallel requests is comfortable.
-    max_concurrent: int = 4
+    # Concurrency limit when running the benchmark. Tier-1 (50K input
+    # tokens/min) doesn't have room for parallelism — bursts of 4 trip the
+    # rate limit and the SDK has to back off. Sequential is slower but
+    # reliable. Bump to 2-4 on tier 2+ if you have more headroom.
+    max_concurrent: int = 1
     # Per-question timeout in seconds. If the agent is still going at this
     # point something has gone wrong.
     per_question_timeout_s: int = 90
