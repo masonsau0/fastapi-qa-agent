@@ -18,13 +18,27 @@ Spoiler from my dev runs: the agent wins on questions that need following a thre
 
 > Numbers from my dev run. Yours will be similar but not identical — the agent is non-deterministic.
 
-| Metric                  | RAG baseline | Agent | Δ     |
-|-------------------------|--------------|-------|-------|
-| Keyword recall          | _TBD_        | _TBD_ | _TBD_ |
-| File citation accuracy  | _TBD_        | _TBD_ | _TBD_ |
-| Avg tool calls          | —            | _TBD_ | —     |
+| Metric                 | RAG baseline | Agent | Δ      |
+| ---------------------- | ------------ | ----- | ------ |
+| Keyword recall         | 0.879        | 0.863 | -0.016 |
+| File citation accuracy | 0.193        | 0.460 | +0.267 |
+| Avg agent iterations   | —            | 5.68  | —      |
 
-(Replace these once you run `python -m src.eval.run_eval` — the script prints the table and writes `data/results/eval.json`.)
+The headline is **file citation accuracy**: the agent more than doubles the baseline (19% → 46%). The baseline relies on the model's prior knowledge of FastAPI and can often produce a plausible-sounding answer with the right keywords, but it's much worse at pointing at the file the answer actually lives in. The agent does real work — searches, reads files, then writes — and the file citations show it.
+
+The agent loses 1.6 points on keyword recall. That's a real tradeoff worth understanding: the baseline is freer to dump every keyword it knows, while the agent stays grounded in what it retrieved. Honest grounding beats keyword bingo for most real use cases, but for someone just skimming a definition the baseline might feel snappier.
+
+Tool distribution across 50 questions (312 total calls):
+
+| Tool               | Calls | % of total |
+| ------------------ | ----- | ---------- |
+| search_code        | 161   | 52%        |
+| read_file_lines    | 110   | 35%        |
+| search_docs        | 39    | 13%        |
+| find_pr_for_commit | 1     | <1%        |
+| git_log_for_file   | 1     | <1%        |
+
+`search_code` → `read_file_lines` is the dominant pattern (find the relevant chunk, then pull more lines around it for context). The two git-history tools were almost never used — the questions in this benchmark are about "how does X work," not "why did X change," so the git tools sit unused. Honest signal: if I redid the benchmark with more "why did this change" questions, those tools would earn their place.
 
 ## Setup
 
@@ -58,10 +72,12 @@ The clone is shallow (depth 200 commits) so it's small. The index build takes ~2
 ### 2. Mine the benchmark
 
 ```bash
-python -m src.eval.mine_benchmark --target 100
+python -m src.eval.mine_benchmark --target 200
 ```
 
-This pulls 100 candidate (issue, PR) pairs from the FastAPI repo and writes them to `data/benchmark/candidates.jsonl`. Each row has the raw issue and the linked PR.
+This pulls ~200 merged PRs from the FastAPI repo and writes them to `data/benchmark/candidates.jsonl`. Each row has the PR title, body, and list of touched files.
+
+> **Note on mining strategy.** The original plan was to mine closed issues and follow them to their resolving PRs via GitHub's timeline API. After a debug run produced almost no candidates, I inspected the actual timeline events and discovered that FastAPI's contributors don't consistently use the "Closes #N" commit syntax that creates `cross-referenced` events. Issue→PR linkage hit rate was under 5%. I pivoted to mining merged PRs directly — every merged PR already has a title, body, and file list, so the hit rate jumped to ~12%. PR titles also map more cleanly to "How does X work?" questions than raw issue bodies, which tend to be messy bug reports.
 
 **Then the manual part.** Open `candidates.jsonl`, go through them, and for each one you want to keep:
 
@@ -83,6 +99,7 @@ python -m src.eval.run_eval
 Runs both the agent and the RAG baseline on every curated question, scores them, prints a summary, writes `data/results/eval.json`. Costs ~$1–3 in Anthropic credits.
 
 Useful flags:
+
 - `--limit 5` — only run the first 5 questions. Good smoke test.
 - `--no-baseline` or `--no-agent` — run only one of the two.
 
@@ -143,7 +160,11 @@ A few things worth writing down. These are the kinds of details that come up in 
 
 **BM25 needs identifier-aware tokenization for code.** Naively splitting on whitespace makes `get_current_user` a single token, which BM25 will never match against a query for `user`. Splitting on `_` and `.` makes the index much more useful at the cost of slightly diluted IDF.
 
-**Iteration cap matters more than you'd think.** A confused agent can loop on the same tool forever, racking up tokens. The cap at 8 iterations means worst-case cost per question is bounded.
+**Iteration cap matters more than you'd think.** A confused agent can loop on the same tool forever, racking up tokens. My first cap was 8, but it bit me on a "how does dependency injection work" question that legitimately needed to chase across files. I bumped it to 12 and added an instruction in the system prompt: "After 5 calls, write your answer based on what you have rather than searching further." The current average is 5.68, well under the cap.
+
+**Preambles are surprisingly hard to suppress.** My first prompt told the model "go straight into the answer" and got "Now I have a clear picture of how X works..." back almost every time. I had to add an explicit list of forbidden openers ("Now I have", "Perfect", "Let me", "Based on my research") before it stopped. Prompt engineering against your own training data is real.
+
+**Rate limits are infrastructure.** On Anthropic's tier-1 limit (50K input tokens/minute), I had to drop eval concurrency from 4 to 1. The SDK auto-retries on 429s, so nothing breaks — it just takes longer. Lesson: if you're benchmarking a tool-using agent, model the rate limit before you model parallelism.
 
 **The baseline keeps you honest.** Without the RAG-only comparison, you have no way to argue the agent's complexity is paying off. With it, you can make a real claim.
 
