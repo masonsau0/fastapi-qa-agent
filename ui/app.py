@@ -23,8 +23,13 @@ API_URL = os.environ.get("AGENT_API_URL", "http://localhost:8000")
 
 st.set_page_config(page_title="FastAPI Codebase QA Agent", page_icon="🔎", layout="wide")
 st.title("FastAPI Codebase QA Agent")
+st.markdown(
+    "**A tool-using agent that answers questions about a real production codebase by orchestrating five tools "
+    "(code search, docs search, file reads, git log, PR lookup) with Anthropic Claude.**"
+)
 st.caption(
-    "Ask a question about the FastAPI codebase. The agent will search the code, the docs, and git history to answer."
+    "Ask a question below. The agent will search the code, the docs, and git history to answer, "
+    "and you'll see exactly which tools it called in the trace at the bottom."
 )
 
 
