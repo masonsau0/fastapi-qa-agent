@@ -18,8 +18,6 @@ Spoiler from my dev runs: the agent wins on questions that need following a thre
 
 ## Results
 
-> Numbers from my dev run. Yours will be similar but not identical, since the agent is non-deterministic.
-
 | Metric                 | RAG baseline | Agent | Δ      |
 | ---------------------- | ------------ | ----- | ------ |
 | Keyword recall         | 0.879        | 0.863 | -0.016 |
@@ -155,8 +153,6 @@ data/
 ```
 
 ## What I learned building this
-
-A few things worth writing down. These are the kinds of details that come up in interviews.
 
 **Tool descriptions matter as much as tool implementations.** My first pass at `search_code` vs `search_docs` had similar descriptions and the agent kept picking the wrong one. Adding explicit disambiguation ("prefer this for X, prefer the other for Y") fixed it. The descriptions are basically prompt engineering.
 
