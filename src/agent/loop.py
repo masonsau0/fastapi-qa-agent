@@ -51,6 +51,10 @@ Guidelines:
     with transitional phrases like "Now I have", "Perfect", "Let me", "Based on
     my research", or "Here is". These are forbidden and will be considered an
     error.
+    CRITICAL: Your final answer MUST begin with a Markdown heading (## or #) or
+    a direct sentence stating the answer. Words that MUST NEVER appear in the
+    first 10 words of your answer: "Now", "Perfect", "Excellent", "Let me",
+    "Based on", "Here is", "I have", "I now", "Great", "I'll".
 """
 
 

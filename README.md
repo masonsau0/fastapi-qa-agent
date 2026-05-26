@@ -1,5 +1,7 @@
 # FastAPI Codebase QA Agent
 
+https://github.com/user-attachments/assets/3ffde1ca-41a7-411a-b743-33d430a12f4f
+
 A tool-using agent that answers questions about the [FastAPI](https://github.com/fastapi/fastapi) codebase. Ask it "how does dependency injection work?" or "why did this file change recently?" and it goes and figures it out. It searches the code, searches the docs, reads specific files, and looks at git history.
 
 The point of the project isn't really the agent. It's the **comparison**. There's a RAG-only baseline (one shot of retrieval, one shot of generation) and the tool-using agent, run on the same 50-question benchmark, with the same model underneath. The eval tells you whether the extra complexity of the agent loop actually pays off, or whether you'd be better off just doing RAG.
